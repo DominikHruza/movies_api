@@ -15,6 +15,7 @@ exports.searchLocalDb = async (req, res, next) => {
 
     if (foundMovies.length === 0) {
       res.status(404).send({ msg: "No records match your search" });
+      return;
     }
 
     res.status(200).json(foundMovies);
