@@ -1,30 +1,20 @@
 const Movie = require("../models/Movie");
 const onlineResources = require("../helpers/online_resources");
-const { search } = require("../routes/movie");
 
-const {
-  searchOnlineResources: searchOnlineResource,
-  saveResourceToDb,
-} = onlineResources;
+const { searchOnlineResources, saveResourceToDb } = onlineResources;
 
 exports.searchLocalDb = async (req, res, next) => {
   const searchTerm = req.query.movieName;
-  if (!searchTerm || searchTerm === "") {
-    res.status(400).send({ msg: "Search parameter cannot be empty" });
-    return;
-  }
 
   try {
-    //Search for a movie in local db
+    //Get all movies in local db that match given criteria
     const foundMovies = await Movie.find({
       //make search query case insesitive
       Title: { $regex: searchTerm, $options: "i" },
     });
 
-    // If no movie with specified name in local db go to next middleware
     if (foundMovies.length === 0) {
-      next();
-      return;
+      res.status(404).send({ msg: "No records match your search" });
     }
 
     res.status(200).json(foundMovies);
@@ -34,16 +24,23 @@ exports.searchLocalDb = async (req, res, next) => {
   }
 };
 
-exports.saveToLocalDb = async (req, res) => {
+exports.searchResources = async (req, res, next) => {
   const searchTerm = req.query.movieName;
 
-  if (!searchTerm || searchTerm === "") {
-    res.status(400).send({ msg: "Search parameter cannot be empty" });
-    return;
-  }
-  //Get specified movie data from online resource and save to local db
   try {
-    const resultData = await searchOnlineResource(searchTerm);
+    //Search data online
+    const resultData = await searchOnlineResources(searchTerm);
+
+    //Check if resource already in local db
+    const found = await Movie.findOne({ Title: resultData.Title });
+
+    //If movie exist run next midleware
+    if (found) {
+      next();
+      return;
+    }
+
+    //Else save resource in database
     const savedData = await saveResourceToDb(resultData);
     res
       .status(200)
@@ -55,10 +52,6 @@ exports.saveToLocalDb = async (req, res) => {
 
 exports.searchSpecific = async (req, res) => {
   const searchTerm = req.query.movieName;
-  if (!searchTerm || searchTerm === "") {
-    res.status(400).send({ msg: "Search parameter cannot be empty" });
-    return;
-  }
 
   try {
     //Search record in local db that matches given term
@@ -81,10 +74,6 @@ exports.searchSpecific = async (req, res) => {
 
 exports.deleteResourceFromDb = async (req, res) => {
   const searchTerm = req.query.movieName;
-  if (!searchTerm || searchTerm === "") {
-    res.status(400).send({ msg: "Search parameter cannot be empty" });
-    return;
-  }
 
   try {
     const resourceFound = await Movie.findOne(

@@ -7,10 +7,6 @@ exports.searchOnlineResources = async (searchTerm, type) => {
     const result = await axios.get(
       `http://www.omdbapi.com/?t=${searchTerm}&apikey=24ef68c2`
     );
-
-    if (result.data.Error) {
-      throw new Error("Online resource: No movies match your search!");
-    }
     return result.data;
   }
 
