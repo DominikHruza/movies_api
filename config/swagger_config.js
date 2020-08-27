@@ -5,7 +5,10 @@ const swaggerConfig = {
     info: {
       title: "Movie API",
       decription: "Search movies/shows information",
-      servers: ["http://localhost:3000"],
+      servers: [
+        "https://movie-search123.herokuapp.com/",
+        "http://localhost:3000",
+      ],
       version: "1.0.0",
     },
   },
