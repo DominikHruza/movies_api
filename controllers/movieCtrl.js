@@ -89,7 +89,7 @@ exports.deleteResourceFromDb = async (req, res) => {
   try {
     const resourceFound = await Movie.findOne(
       //make delete query case insesitive and exact match
-      { Title: { $regex: new RegExp("^" + searchTerm.toLowerCase(), "i") } }
+      { Title: { $regex: "^" + searchTerm + "$", $options: "i" } }
     );
 
     //Check if exists in local db
